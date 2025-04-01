@@ -1,5 +1,3 @@
-# create_adapters.py
-
 import os
 import torch
 from datasets import load_dataset
@@ -7,10 +5,17 @@ from transformers import (
     AutoTokenizer, AutoModelForCausalLM, TrainingArguments, Trainer, BitsAndBytesConfig
 )
 from peft import prepare_model_for_kbit_training, LoraConfig, get_peft_model
+import argparse
 
-base_model_path = "/workspace/remove-refusals-with-transformer/mistral-small-24b"
-dataset_dir = "data/jsonl_datasets"  # Directory containing multiple jsonl files
-adapters_base_dir = "./adapters"
+parser = argparse.ArgumentParser()
+parser.add_argument("--base_model_path", type=str, required=True)
+parser.add_argument("--dataset_dir", type=str, default="data/jsonl_datasets")
+parser.add_argument("--adapters_base_dir", type=str, default="./adapters")
+args = parser.parse_args()
+
+base_model_path = args.base_model_path
+dataset_dir = args.dataset_dir
+adapters_base_dir = args.adapters_base_dir
 
 os.makedirs(adapters_base_dir, exist_ok=True)
 
@@ -25,7 +30,7 @@ for i, filename in enumerate(dataset_files):
 
     dataset = load_dataset("json", data_files=dataset_path)["train"]
 
-    tokenizer = AutoTokenizer.from_pretrained(base_model_path, trust_remote_code=True)
+    tokenizer = AutoTokenizer.from_pretrained(base_model_path, trust_remote_code=True, local_files_only=True)
     tokenizer.pad_token = tokenizer.eos_token
 
     def tokenize(example):
@@ -46,7 +51,8 @@ for i, filename in enumerate(dataset_files):
         base_model_path,
         quantization_config=bnb_config,
         device_map="auto",
-        trust_remote_code=True
+        trust_remote_code=True,
+        local_files_only=True
     )
 
     model = prepare_model_for_kbit_training(model)
@@ -81,4 +87,5 @@ for i, filename in enumerate(dataset_files):
     trainer.train()
     model.save_pretrained(adapter_output_dir)
     tokenizer.save_pretrained(adapter_output_dir)
+
 
