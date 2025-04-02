@@ -18,6 +18,7 @@ dataset_dir = args.dataset_dir
 adapters_base_dir = args.adapters_base_dir
 
 os.makedirs(adapters_base_dir, exist_ok=True)
+from transformers import DataCollatorForLanguageModeling
 
 dataset_files = sorted([f for f in os.listdir(dataset_dir) if f.endswith(".jsonl")])
 
@@ -30,6 +31,10 @@ for i, filename in enumerate(dataset_files):
 
     dataset = load_dataset("json", data_files=dataset_path)["train"]
 
+    data_collator = DataCollatorForLanguageModeling(
+        tokenizer=tokenizer, mlm=False
+    )
+    
     tokenizer = AutoTokenizer.from_pretrained(base_model_path, trust_remote_code=True, local_files_only=True)
     tokenizer.pad_token = tokenizer.eos_token
 
@@ -75,6 +80,7 @@ for i, filename in enumerate(dataset_files):
         save_strategy="epoch",
         save_total_limit=2,
         logging_steps=50,
+        label_names=["labels"],
         report_to="none"
     )
 
@@ -82,6 +88,7 @@ for i, filename in enumerate(dataset_files):
         model=model,
         args=training_args,
         train_dataset=tokenized_data,
+        tokenizer=tokenizer
     )
 
     trainer.train()
