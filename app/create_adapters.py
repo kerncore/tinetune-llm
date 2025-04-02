@@ -81,7 +81,6 @@ for i, filename in enumerate(dataset_files):
         save_strategy="epoch",
         save_total_limit=2,
         logging_steps=50,
-        label_names=["labels"],
         report_to="none"
     )
 
