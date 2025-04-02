@@ -34,6 +34,7 @@ for i, filename in enumerate(dataset_files):
     data_collator = DataCollatorForLanguageModeling(
         tokenizer=tokenizer, mlm=False
     )
+    training_args.label_names = ["labels"]
     
     tokenizer = AutoTokenizer.from_pretrained(base_model_path, trust_remote_code=True, local_files_only=True)
     tokenizer.pad_token = tokenizer.eos_token
@@ -69,7 +70,7 @@ for i, filename in enumerate(dataset_files):
         bias="none",
         task_type="CAUSAL_LM"
     ))
-
+    
     training_args = TrainingArguments(
         output_dir=adapter_output_dir,
         per_device_train_batch_size=2,
@@ -88,7 +89,8 @@ for i, filename in enumerate(dataset_files):
         model=model,
         args=training_args,
         train_dataset=tokenized_data,
-        tokenizer=tokenizer
+        tokenizer=tokenizer,
+        data_collator=data_collator
     )
 
     trainer.train()
