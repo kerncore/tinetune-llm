@@ -10,6 +10,6 @@
     "typescript": "^5.4.0"
   },
   "scripts": {
-    "start": "ts-node embedding.ts"
+    "start": "node embedding.js"
   }
 }

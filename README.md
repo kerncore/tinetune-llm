@@ -7,7 +7,6 @@ This repository contains minimal examples for working with language models and e
 - Node.js 18 or newer (tested with Node 22)
 - npm (comes with Node) or another package manager
 - ts-node (installed as a development dependency)
-
 The script relies on the `@xenova/transformers` package which provides CPU and Apple Silicon GPU (Metal) backends. When running on an Apple M series machine the library will automatically use the Metal backend if available.
 
 ## Installation
@@ -24,7 +23,9 @@ The script relies on the `@xenova/transformers` package which provides CPU and A
    ```
    or
    ```bash
-   npx ts-node embedding.ts
+
+   node embedding.js
+
    ```
 
 This will download the `Qwen/Qwen3-Embedding-0.6B` model and compute similarity scores between example queries and documents.
