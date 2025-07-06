@@ -5,6 +5,10 @@
   "dependencies": {
     "@xenova/transformers": "^2.5.0"
   },
+  "devDependencies": {
+    "ts-node": "^10.9.1",
+    "typescript": "^5.4.0"
+  },
   "scripts": {
     "start": "node embedding.js"
   }
