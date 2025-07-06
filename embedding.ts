@@ -53,7 +53,8 @@ async function main() {
 
   const inputTexts = queries.concat(documents);
 
-  const tokenizer = await AutoTokenizer.from_pretrained('Qwen/Qwen3-Embedding-0.6B', { padding_side: 'left' });
+  const tokenizer = await AutoTokenizer.from_pretrained('Qwen/Qwen3-Embedding-0.6B');
+  tokenizer.padding_side = 'left';
   const model = await AutoModel.from_pretrained('Qwen/Qwen3-Embedding-0.6B');
 
   const batch = await tokenizer(inputTexts, { padding: true, truncation: true, max_length: 8192 });
