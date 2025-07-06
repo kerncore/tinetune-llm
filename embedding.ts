@@ -1,4 +1,4 @@
-type Tensor = import('@xenova/transformers').Tensor;
+import { AutoTokenizer, AutoModel, type Tensor } from '@xenova/transformers';
 
 // Pool the hidden states of the last valid token for each sequence.
 function lastTokenPool(lastHiddenStates: Tensor, attentionMask: Tensor): Tensor {
@@ -38,7 +38,6 @@ function getDetailedInstruct(taskDescription: string, query: string): string {
 }
 
 async function main() {
-  const { AutoTokenizer, AutoModel } = await import('@xenova/transformers');
   const task = 'Given a web search query, retrieve relevant passages that answer the query';
 
   const queries = [
@@ -53,7 +52,8 @@ async function main() {
 
   const inputTexts = queries.concat(documents);
 
-  const tokenizer = await AutoTokenizer.from_pretrained('Qwen/Qwen3-Embedding-0.6B', { padding_side: 'left' });
+  const tokenizer = await AutoTokenizer.from_pretrained('Qwen/Qwen3-Embedding-0.6B');
+  tokenizer.padding_side = 'left';
   const model = await AutoModel.from_pretrained('Qwen/Qwen3-Embedding-0.6B');
 
   const batch = await tokenizer(inputTexts, { padding: true, truncation: true, max_length: 8192 });
