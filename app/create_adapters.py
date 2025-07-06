@@ -20,6 +20,9 @@ adapters_base_dir = args.adapters_base_dir
 os.makedirs(adapters_base_dir, exist_ok=True)
 from transformers import DataCollatorForLanguageModeling
 
+tokenizer = AutoTokenizer.from_pretrained(base_model_path, trust_remote_code=True, local_files_only=True)
+tokenizer.pad_token = tokenizer.eos_token
+
 dataset_files = sorted([f for f in os.listdir(dataset_dir) if f.endswith(".jsonl")])
 
 for i, filename in enumerate(dataset_files):
@@ -34,10 +37,6 @@ for i, filename in enumerate(dataset_files):
     data_collator = DataCollatorForLanguageModeling(
         tokenizer=tokenizer, mlm=False
     )
-    training_args.label_names = ["labels"]
-    
-    tokenizer = AutoTokenizer.from_pretrained(base_model_path, trust_remote_code=True, local_files_only=True)
-    tokenizer.pad_token = tokenizer.eos_token
 
     def tokenize(example):
         tokenized = tokenizer(example["text"], truncation=True, padding="max_length", max_length=1024)
