@@ -1,0 +1,11 @@
+{
+  "name": "tinetune-llm",
+  "version": "1.0.0",
+  "type": "module",
+  "dependencies": {
+    "@xenova/transformers": "^2.5.0"
+  },
+  "scripts": {
+    "start": "node embedding.js"
+  }
+}
