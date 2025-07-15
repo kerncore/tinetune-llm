@@ -4,7 +4,7 @@ SentenceTransformer embedding-throughput benchmark
 
 Example
 -------
-python mlx_benchmark.py --embed /path/to/project/src
+python st_benchmark.py --embed /path/to/project/src
 """
 
 from __future__ import annotations
@@ -15,7 +15,7 @@ import time
 from typing import List
 
 import numpy as np
-from sentence_transformers import SentenceTransformer
+from sentence_transformers import SentenceTransformer, __version__ as st_version
 from transformers import AutoTokenizer, PreTrainedTokenizerBase
 
 # --------------------------------------------------------------------------------------
@@ -48,9 +48,10 @@ class STEmbeddingBenchmark:
         "Identify all top-level and nested symbol declarations with their scopes and accessibility modifiers",
     ]
 
-    def __init__(self, model_id: str, max_length: int = 8192):
+    def __init__(self, model_id: str, max_length: int = 8192, device: str = "cpu"):
         self.model_id   = model_id
         self.max_length = max_length
+        self.device     = device
 
         # Accumulators
         self.total_tokens          = 0
@@ -61,8 +62,13 @@ class STEmbeddingBenchmark:
         self.total_time_per_file:  List[float] = []
         self.total_files_processed = 0
 
+        if tuple(int(x) for x in st_version.split(".")[:2]) < (2, 2):
+            raise RuntimeError(
+                f"sentence-transformers >=2.2.0 required, found {st_version}"
+            )
+
         print("⏳ Loading model …")
-        self.model = SentenceTransformer(model_id)
+        self.model = SentenceTransformer(model_id, device=self.device)
         self.model.max_seq_length = max_length
 
         print("⏳ Loading tokenizer from 🤗 Transformers …")
@@ -240,9 +246,14 @@ def main() -> None:
         default="kerncore/Qwen3-Embedding-0.6B-MXL-4bit",
         help="HF model id (must be sentence-embedding capable)",
     )
+    parser.add_argument(
+        "--device",
+        default="cpu",
+        help="Device for inference (cpu, cuda, or mps)",
+    )
     args = parser.parse_args()
 
-    bench = STEmbeddingBenchmark(args.model)
+    bench = STEmbeddingBenchmark(args.model, device=args.device)
 
     if os.path.isfile(args.embed):
         bench.benchmark_file(args.embed)
