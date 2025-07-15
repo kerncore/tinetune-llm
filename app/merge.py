@@ -20,17 +20,33 @@ adapter_dirs = sorted([
 print(f"Merging adapters: {adapter_dirs}")
 
 # Start from the first adapter
-model = AutoModelForCausalLM.from_pretrained(args.base_model_path, torch_dtype=torch.float16, device_map={"": "cpu"},, trust_remote_code=True, local_files_only=True)
+model = AutoModelForCausalLM.from_pretrained(
+    args.base_model_path,
+    torch_dtype=torch.float16,
+    device_map={"": "cpu"},
+    trust_remote_code=True,
+    local_files_only=True,
+)
 model = PeftModel.from_pretrained(model, adapter_dirs[0])
 model = model.merge_and_unload()
 model.save_pretrained("./temp-merged-step", safe_serialization=True)
 
 # Merge rest
 for adapter_path in adapter_dirs[1:]:
-    model = AutoModelForCausalLM.from_pretrained("./temp-merged-step", torch_dtype=torch.float16, device_map={"": "cpu"},, trust_remote_code=True, local_files_only=True)
+    model = AutoModelForCausalLM.from_pretrained(
+        "./temp-merged-step",
+        torch_dtype=torch.float16,
+        device_map={"": "cpu"},
+        trust_remote_code=True,
+        local_files_only=True,
+    )
     model = PeftModel.from_pretrained(model, adapter_path)
     model = model.merge_and_unload()
-    model.save_pretrained("./temp-merged-step", safe_serialization=True, max_shard_size="10GB")
+    model.save_pretrained(
+        "./temp-merged-step",
+        safe_serialization=True,
+        max_shard_size="10GB",
+    )
 
 # Save final merged
 model.save_pretrained(args.output_path, safe_serialization=True)
