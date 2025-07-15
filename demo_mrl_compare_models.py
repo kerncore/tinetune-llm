@@ -65,6 +65,7 @@ if __name__ == "__main__":
     print(header)
     print("-" * len(header))
 
+    results = []
     for level, (dim, metrics) in enumerate(
         progressive_similarity(models, texts, dims, full_dims),
         start=1,
@@ -73,6 +74,7 @@ if __name__ == "__main__":
         cos_4b, dist_4b = metrics["4B"]
         cos_diff = cos_4b - cos_06b
         dist_diff = dist_4b - dist_06b
+        results.append((dim, cos_diff, dist_diff))
         print(
             f"{level:>5} | {dim:>4} | {cos_06b: .4f} | {dist_06b: .4f} | "
             f"{cos_4b: .4f} | {dist_4b: .4f} | {cos_diff: .4f} | {dist_diff: .4f}"
@@ -85,4 +87,12 @@ if __name__ == "__main__":
         "representation and each subsequent layer adds 256 dimensions up to the full size "
         f"({max_dim} for the largest model). Positive cosine difference means the 4B model "
         "predicts higher similarity between the sentences, while negative means lower."
+    )
+
+    # Basic self-analysis: suggest dimension where models behave most similarly
+    best_dim, best_cos_diff, _ = min(results, key=lambda r: abs(r[1]))
+    print("\nSuggested MRL parameters:")
+    print(
+        f"Use dimension {best_dim} as it yields the smallest cosine difference (Δ={best_cos_diff:.4f}) "
+        "between the two models."
     )
